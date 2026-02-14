@@ -1,63 +1,40 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="UTF-8">
+</head>
 <body>
-<button onclick="generate()">Generate 3cm PNG</button>
+
+<input type="text" id="number" placeholder="输入号码">
+<button onclick="generate()">Generate</button>
 
 <script>
 function generate() {
-  for (let i = 1; i <= 24; i++) {
 
-    const canvas = document.createElement("canvas");
-    canvas.width = 354;
-    canvas.height = 354;
-    const ctx = canvas.getContext("2d");
+  const value = document.getElementById("number").value.trim();
+  if (!value) return alert("请输入号码");
 
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, 354, 354);
+  const canvas = document.createElement("canvas");
+  canvas.width = 354;
+  canvas.height = 354;
 
-    ctx.fillStyle = "black";
-    ctx.font = "bold 200px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(i, 177, 177);
+  const ctx = canvas.getContext("2d");
 
-    canvas.toBlob(function(blob) {
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, 354, 354);
 
-      const reader = new FileReader();
-      reader.onload = function() {
-        let arrayBuffer = this.result;
-        let data = new Uint8Array(arrayBuffer);
+  ctx.fillStyle = "black";
+  ctx.font = "bold 200px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(value, 177, 177);
 
-        // 修改 PNG DPI 为 300
-        const dpi = 300;
-        const ppm = Math.round(dpi / 0.0254);
-
-        // PNG pHYs chunk
-        const physChunk = new Uint8Array([
-          0x00,0x00,0x00,0x09,
-          0x70,0x48,0x59,0x73,
-          (ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,
-          (ppm>>24)&255,(ppm>>16)&255,(ppm>>8)&255,ppm&255,
-          0x01,
-          0x00,0x00,0x00,0x00
-        ]);
-
-        const combined = new Uint8Array(data.length + physChunk.length);
-        combined.set(data.slice(0,33));
-        combined.set(physChunk,33);
-        combined.set(data.slice(33),33+physChunk.length);
-
-        const blob2 = new Blob([combined], {type:"image/png"});
-
-        const link = document.createElement("a");
-        link.download = i + ".png";
-        link.href = URL.createObjectURL(blob2);
-        link.click();
-      };
-      reader.readAsArrayBuffer(blob);
-    });
-  }
+  const link = document.createElement("a");
+  link.download = value + ".png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
 }
 </script>
+
 </body>
 </html>
