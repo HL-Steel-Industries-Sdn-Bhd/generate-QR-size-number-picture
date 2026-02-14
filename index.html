@@ -20,7 +20,6 @@ Generate
 
 <script>
 function generate() {
-
   const value = document.getElementById("number").value.trim();
   if (!value) {
     alert("请输入号码");
@@ -34,32 +33,41 @@ function generate() {
 
   const ctx = canvas.getContext("2d");
 
+  // 1. 先设置文本基线为 middle（关键修复！）
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+
   // 背景
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, size, size);
 
   // 字体
-  const fontSize = 300; // 放大1.5倍
+  const fontSize = 280; // 稍微调小一点，留出边距
   ctx.font = "bold " + fontSize + "px Arial";
   ctx.fillStyle = "black";
 
-  // 测量文字
+  // 2. 直接使用画布中心点，配合textBaseline实现完美居中
+  const centerX = size / 2;
+  const centerY = size / 2;
+
+  // 3. 测量文字宽度，确保不超出边界
   const metrics = ctx.measureText(value);
-
   const textWidth = metrics.width;
-  const textHeight =
-    metrics.actualBoundingBoxAscent +
-    metrics.actualBoundingBoxDescent;
+  
+  // 如果文字太宽，按比例缩小字体
+  let finalFontSize = fontSize;
+  if (textWidth > size * 0.9) {
+    finalFontSize = Math.floor(fontSize * (size * 0.9 / textWidth));
+    ctx.font = "bold " + finalFontSize + "px Arial";
+  }
 
-  // 数学居中
-  const x = (size - textWidth) / 2;
-  const y = (size + textHeight) / 2
-            - metrics.actualBoundingBoxDescent;
+  // 4. 绘制文字（已经自动居中了）
+  ctx.fillText(value, centerX, centerY);
 
-  // 光学补偿（往下调）
-  const opticalOffset = size * 0.04;  // 4% ≈ 14px
-
-  ctx.fillText(value, x, y + opticalOffset);
+  // 可选：添加一个极淡的边框，方便查看边界
+  ctx.strokeStyle = "#eee";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0, 0, size, size);
 
   // 下载
   const link = document.createElement("a");
