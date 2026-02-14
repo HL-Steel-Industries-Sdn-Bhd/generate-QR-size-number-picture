@@ -2,33 +2,66 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<title>3cm Number Generator</title>
 </head>
-<body>
+<body style="font-family: Arial; text-align:center; margin-top:40px;">
 
-<input type="text" id="number" placeholder="输入号码">
-<button onclick="generate()">Generate</button>
+<h2>3cm × 3cm Number PNG Generator</h2>
+
+<input type="text" id="number" placeholder="输入号码" 
+       style="font-size:20px; padding:5px; width:120px;">
+<button onclick="generate()" 
+        style="font-size:20px; padding:6px 15px;">
+Generate
+</button>
+
+<br><br>
+<canvas id="preview" style="border:1px solid #ccc;"></canvas>
 
 <script>
 function generate() {
 
   const value = document.getElementById("number").value.trim();
-  if (!value) return alert("请输入号码");
+  if (!value) {
+    alert("请输入号码");
+    return;
+  }
 
-  const canvas = document.createElement("canvas");
-  canvas.width = 354;
-  canvas.height = 354;
+  const size = 354; // 3cm @ 300 DPI
+  const canvas = document.getElementById("preview");
+  canvas.width = size;
+  canvas.height = size;
 
   const ctx = canvas.getContext("2d");
 
+  // 背景
   ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, 354, 354);
+  ctx.fillRect(0, 0, size, size);
 
+  // 字体
+  const fontSize = 300; // 放大1.5倍
+  ctx.font = "bold " + fontSize + "px Arial";
   ctx.fillStyle = "black";
-  ctx.font = "bold 300px Arial";   // ← 放大1.5倍
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(value, 177, 177);
 
+  // 测量文字
+  const metrics = ctx.measureText(value);
+
+  const textWidth = metrics.width;
+  const textHeight =
+    metrics.actualBoundingBoxAscent +
+    metrics.actualBoundingBoxDescent;
+
+  // 数学居中
+  const x = (size - textWidth) / 2;
+  const y = (size + textHeight) / 2
+            - metrics.actualBoundingBoxDescent;
+
+  // 光学补偿（往下调）
+  const opticalOffset = size * 0.04;  // 4% ≈ 14px
+
+  ctx.fillText(value, x, y + opticalOffset);
+
+  // 下载
   const link = document.createElement("a");
   link.download = value + ".png";
   link.href = canvas.toDataURL("image/png");
